@@ -1,6 +1,7 @@
 "use strict";
 
-const apiUrl = "http://dss-todo-server.herokuapp.com/api";
+const apiUrl = "http://localhost:5000/api";
+//const apiUrl = "http://dss-todo-server.herokuapp.com/api";
 
 const ToDo = React.createClass({
   getInitialState: function() {
@@ -10,11 +11,12 @@ const ToDo = React.createClass({
   },
   render: function() {
     return (
-      <label className="todo">
+      <span className="todo">
         <input type="checkbox" defaultChecked={this.state.isDone} onClick={this.handleClick}/>
-        {this.props.text}
+        <span className="taskText">{this.props.text}</span>
+        <span className="tiny" onClick={this.del}>del</span>
         <br/>
-      </label>
+      </span>
     );
   },
   handleClick: function(event) {
@@ -30,8 +32,28 @@ const ToDo = React.createClass({
         console.log(textStatus, errorThrown);
       }
     });
+  },
+  del:function(event) {
+    console.log("attempting delete");
+    $.ajax({
+      url: apiUrl + "?key=" + this.props.fbKey,
+      type: "DELETE",
+      success: () => {
+        console.log("deleted");
+        // remove deleted key from state.list array
+        // %%% but state isn't available in this scope...
+        this.state.list = this.state.list.filter((el) => {
+          return this.state.list.key !== this.props.fbKey;
+        });
+      },
+      error: (jqXHR, textStatus, errorThrown) => {
+        console.log(textStatus, errorThrown);
+      }
+    });
   }
 });
+
+%%%% put the displayList in the Global context?
 
 const ToDoList = React.createClass({
   getInitialState: function() {
@@ -61,19 +83,19 @@ const ToDoList = React.createClass({
     });
   },
   render: function() {
-    // conditional render: don't return HTML before AJAX is finished
+    // conditional: don't return HTML before AJAX is finished
     if (this.state.list.length > 0) {
+      // create a list of React elements
+      let displayList = this.state.list.map((o) => {
+        return <ToDo key={o.id} fbKey={o.id} text={o.data.text} isDone={o.data.isDone}></ToDo>
+      });
+      console.log(displayList);
       return (
         <div className="todoList">
-          {this.generateDisplayList(this.state.list)}
+          <ul>{displayList}</ul>
         </div>
       );
     } else { return null }
-  },
-  generateDisplayList: function(arr) {
-    return arr.map((o) => {
-      return <ToDo key={o.id} fbKey={o.id} text={o.data.text} isDone={o.data.isDone}></ToDo>
-    });
   },
   addTask: function(event) {
     $.ajax({
@@ -84,7 +106,7 @@ const ToDoList = React.createClass({
       success: (res) => {
         let newArray = this.state.list;
         newArray.unshift({
-          "id": res.data.key,
+          "id"  : res.data.key,
           "data": { "isDone": res.data.isDone,
                     "text": res.data.text }
         });

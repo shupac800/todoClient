@@ -1,0 +1,29 @@
+.todo input {
+  margin: 6px 7px 6px 0px;
+  padding: 0;
+}
+
+.taskText {
+  padding: 2px 8px 2px 8px;
+  color: #FFF600;
+  border: 0px solid #FFF;
+  border-radius: .5em;
+  background-color: #13138F;
+}
+
+body {
+  font-family: "Open Sans", "Arial", sans-serif;
+  font-size: 0.9em;
+  background-color: #DDD;
+}
+
+.tiny {
+  color: red;
+  padding-left:  5px;
+  font-size: .6em;
+  cursor: default;
+}
+
+#newTaskName{
+  border-radius: .5em;
+}
