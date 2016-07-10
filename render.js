@@ -39,6 +39,7 @@ const ToDoList = React.createClass({
   },
   componentDidMount: function() {
     $("#addTask").on("click", this.addTask);
+    $("#newTaskName").on("keydown", (e) => {if (e.which === 13) this.addTask()});
     this.loadToDoListFromServer();
   },
   loadToDoListFromServer: function() {
@@ -74,7 +75,7 @@ const ToDoList = React.createClass({
       return <ToDo key={o.id} fbKey={o.id} text={o.data.text} isDone={o.data.isDone}></ToDo>
     });
   },
-  addTask: function(e) {
+  addTask: function(event) {
     $.ajax({
       url: apiUrl,
       type: "POST",
@@ -88,6 +89,7 @@ const ToDoList = React.createClass({
                     "text": res.data.text }
         });
         this.setState({list: newArray});  // setState triggers new render
+        $("#newTaskName").val("").focus();  // clear input box and focus on it
       },
       error: (jqXHR, textStatus, errorThrown) => {
         console.log(textStatus, errorThrown);
