@@ -14,8 +14,6 @@ const ToDo = React.createClass({
       <span className="todo">
         <input type="checkbox" defaultChecked={this.state.isDone} onClick={this.handleClick}/>
         <span className="taskText">{this.props.text}</span>
-        <span className="tiny" onClick={this.del}>del</span>
-        <br/>
       </span>
     );
   },
@@ -32,28 +30,8 @@ const ToDo = React.createClass({
         console.log(textStatus, errorThrown);
       }
     });
-  },
-  del:function(event) {
-    console.log("attempting delete");
-    $.ajax({
-      url: apiUrl + "?key=" + this.props.fbKey,
-      type: "DELETE",
-      success: () => {
-        console.log("deleted");
-        // remove deleted key from state.list array
-        // %%% but state isn't available in this scope...
-        this.state.list = this.state.list.filter((el) => {
-          return this.state.list.key !== this.props.fbKey;
-        });
-      },
-      error: (jqXHR, textStatus, errorThrown) => {
-        console.log(textStatus, errorThrown);
-      }
-    });
   }
 });
-
-%%%% put the displayList in the Global context?
 
 const ToDoList = React.createClass({
   getInitialState: function() {
@@ -87,7 +65,10 @@ const ToDoList = React.createClass({
     if (this.state.list.length > 0) {
       // create a list of React elements
       let displayList = this.state.list.map((o) => {
-        return <ToDo key={o.id} fbKey={o.id} text={o.data.text} isDone={o.data.isDone}></ToDo>
+        return <li key={o.id}>
+                 <ToDo fbKey={o.id} text={o.data.text} isDone={o.data.isDone}></ToDo>
+                 <span className="tiny" id={o.id} onClick={this.deleteTask}>del</span>
+               </li>
       });
       console.log(displayList);
       return (
@@ -96,6 +77,27 @@ const ToDoList = React.createClass({
         </div>
       );
     } else { return null }
+  },
+  deleteTask: function(e) {
+    let keyToDelete = e.target.getAttribute("id");
+    console.log("record to eliminate:",this.state.list.filter(n => n.id === keyToDelete));
+    console.log("attempting delete on:",e.target);
+    $.ajax({
+      url: apiUrl + "?key=" + keyToDelete,
+      type: "DELETE",
+      success: () => {
+        console.log("deleted");
+        // how do you 
+        // remove deleted key from state.list array; setState will trigger re-render
+        this.setState({list: this.state.list.filter(el => el.id !== keyToDelete)})
+        //console.log("this.state.list is now",this.state.list);
+        //console.log("record eliminated?:",this.state.list.filter(n => n.id === keyToDelete));
+
+      },
+      error: (jqXHR, textStatus, errorThrown) => {
+        console.log(textStatus, errorThrown);
+      }
+    });
   },
   addTask: function(event) {
     $.ajax({

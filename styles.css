@@ -22,8 +22,17 @@ body {
   padding-left:  5px;
   font-size: .6em;
   cursor: default;
+  vertical-align: middle;
 }
 
 #newTaskName{
   border-radius: .5em;
+}
+
+#addTask{
+  font-family: "Open Sans", "Arial", sans-serif;
+}
+
+ul > li {
+  list-style-type: none;
 }
